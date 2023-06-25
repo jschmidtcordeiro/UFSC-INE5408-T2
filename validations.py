@@ -122,8 +122,8 @@ def validate_game_cereating_threads_once(solutions, process_number, solution_num
             
 
 def count_to_nine(list):
-    """ Count from 1 to 9 verifing if the list contains 
-    one of each number
+    """ Sum every element of the list and then check if
+    it is equal to 45 (The expected value)
 
     Parameters
     ----------
@@ -136,11 +136,11 @@ def count_to_nine(list):
         If it has an error, return false, if it's ok 
         return true
     """
-    for i in range(1,9):
-        if i not in list:
-            return False
+    sum = 0
+    for i in list:
+        sum += i
 
-    return True
+    return sum == 45
 
 def validate_line(line_number, matrix):
     """ Define the initial point, final point and the steps to
