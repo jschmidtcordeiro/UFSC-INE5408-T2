@@ -24,7 +24,7 @@ def run_and_print_time(n_process, n_threads, function_name, sequential_time = No
 
     result = f"{function_name}: {n_process} {n_threads} = {end - begin:.3f} segundos!"
     if sequential_time is not None:
-        result += f" --> speedup = {(end - begin)/sequential_time}"
+        result += f" --> speedup = {sequential_time/(end - begin)}"
     print(result)
 
     return end - begin
