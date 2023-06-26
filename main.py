@@ -110,7 +110,7 @@ def create_process(solutions: list[list[list[int]]], n_process: int, n_threads: 
             end += 1
             remainder -= 1
 
-        process.append(Process(target=validate_game.validate_game_creating_threads_once_and_using_thread_pool, args=(solutions[begin:end], begin + 1, n_threads)))
+        process.append(Process(target=validate_game.validate_many_games_at_once, args=(solutions[begin:end], begin + 1, n_threads)))
         begin = end
 
     for proc in process:
@@ -122,7 +122,6 @@ def create_process(solutions: list[list[list[int]]], n_process: int, n_threads: 
 
 
 if __name__ == "__main__":
-    USE_PROCESS_POOL = False
     NUM_VALIDATIONS = 27
     file, n_process, n_threads = validate_input(argv)
     solutions = read_file(file)
@@ -135,3 +134,4 @@ if __name__ == "__main__":
 
 
     create_process(solutions, n_process, n_threads)
+# 26.46
