@@ -1,10 +1,13 @@
 from sys import argv
 from multiprocessing import Process
 from os.path import exists
-import validations
+from concurrent.futures import ProcessPoolExecutor
+import validate_game
+
+## This is the main file of the program
 
 def validate_input(argv) -> tuple[str, int, int]:
-    """validate arguments in argv
+    """ Validate arguments in argv
 
     Parameters
     ----------
@@ -15,6 +18,7 @@ def validate_input(argv) -> tuple[str, int, int]:
     ------
     tuple[str, int, int]
         tuple with the file that will be read and the number of processes and threads.
+
     """
     
     if len(argv) < 4:
@@ -41,7 +45,7 @@ def validate_input(argv) -> tuple[str, int, int]:
 
 
 def read_file(file: str) -> list[list[list[int]]]:
-    """ Read the input file and create a list containing the various solutions in it
+    """ Read the input file and create a list containing the various solutions on it
 
     Parameters
     ----------
@@ -52,6 +56,7 @@ def read_file(file: str) -> list[list[list[int]]]:
     ------
     list[list[list[int]]]
         A list of matrices, where each one represents a solution
+
     """
 
     with open(file, "r") as f:
@@ -75,37 +80,58 @@ def read_file(file: str) -> list[list[list[int]]]:
 
                 
     return matrices
+   
+
+def create_process(solutions: list[list[list[int]]], n_process: int, n_threads: int) -> None:
+    """ Creates the processes
+
+    Parameters
+    ----------
+    solutions : list[list[list[int]]]
+        The list of all of the solutions
+    n_process : int
+        The number of processes
+    n_threads : int
+        The number of threads that the program is using
+
+    Return
+    ------
+    None
     
-NUM_VALIDATIONS = 27
-file, n_process, n_threads = validate_input(argv)
-solutions = read_file(file)
+    """
+    remainder = len(solutions) % n_process
+    num_solutions = len(solutions) // n_process
+    process: list[Process] = []
+    begin = 0
+    for i in range(n_process):
+        end = begin + num_solutions
+        
+        if remainder > 0:
+            end += 1
+            remainder -= 1
 
-if n_process > len(solutions):
-    n_process = len(solutions)
+        process.append(Process(target=validate_game.validate_game_creating_threads_once_and_using_thread_pool, args=(solutions[begin:end], begin + 1, n_threads)))
+        begin = end
 
-if n_threads > NUM_VALIDATIONS:
-    n_threads = NUM_VALIDATIONS
+    for proc in process:
+        proc.start()
+
+    for proc in process:
+        proc.join()
 
 
-remainder = len(solutions) % n_process
-num_solutions = len(solutions) // n_process
 
-process: list[Process] = []
-begin = 0
-for i in range(n_process):
-    end = begin + num_solutions
-    
-    if remainder > 0:
-        end += 1
-        remainder -= 1
+if __name__ == "__main__":
+    USE_PROCESS_POOL = False
+    NUM_VALIDATIONS = 27
+    file, n_process, n_threads = validate_input(argv)
+    solutions = read_file(file)
 
-    process.append(Process(target=validations.validate_game_cereating_threads_once, args=(solutions[begin:end], i + 1, begin + 1, n_threads)))
-    
-    begin = end
+    if n_process > len(solutions):
+        n_process = len(solutions)
 
-for proc in process:
-    proc.start()
+    if n_threads > NUM_VALIDATIONS:
+        n_threads = NUM_VALIDATIONS
 
-for proc in process:
-    proc.join()
 
+    create_process(solutions, n_process, n_threads)
