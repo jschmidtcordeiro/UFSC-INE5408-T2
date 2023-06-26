@@ -14,7 +14,7 @@ def run_and_print_time(n_process, n_threads, function_name, sequential_time = No
     args = [
         "python3",
         "main.py",
-        "input.txt",
+        "input-big.txt",
         str(n_process),
         str(n_threads),
         function_name
