@@ -31,7 +31,7 @@ def validate_input(argv) -> tuple[str, int, int]:
         exit(1)
     
     try:
-        n_process, n_threads = [int(x) for x in argv[2:]]
+        n_process, n_threads = [int(x) for x in argv[2:4]]
     except:
         print("O a quantidade de threads ou processos deve ser um número inteiro!")
         exit(1)
@@ -82,7 +82,7 @@ def read_file(file: str) -> list[list[list[int]]]:
     return matrices
    
 
-def create_process(solutions: list[list[list[int]]], n_process: int, n_threads: int) -> None:
+def create_process(solutions: list[list[list[int]]], n_process: int, n_threads: int, validation_func) -> None:
     """ Creates the processes
 
     Parameters
@@ -110,7 +110,7 @@ def create_process(solutions: list[list[list[int]]], n_process: int, n_threads: 
             end += 1
             remainder -= 1
 
-        process.append(Process(target=validate_game.validate_many_games_at_once, args=(solutions[begin:end], begin + 1, n_threads)))
+        process.append(Process(target=validation_func, args=(solutions[begin:end], begin + 1, n_threads)))
         begin = end
 
     for proc in process:
@@ -133,5 +133,15 @@ if __name__ == "__main__":
         n_threads = NUM_VALIDATIONS
 
 
-    create_process(solutions, n_process, n_threads)
-# 26.46
+    validation_func = validate_game.validate_many_games_at_once
+    if len(argv) > 4:
+        if argv[4] == "validate_game_creating_threads_once":
+            validation_func = validate_game.validate_game_creating_threads_once
+        elif argv[4] == "validate_game_creating_threads_once_and_using_thread_pool":
+            validation_func = validate_game.validate_game_creating_threads_once_and_using_thread_pool
+        elif argv[4] == "validate_game_thread_pool_executor":
+            validation_func = validate_game.validate_game_thread_pool_executor
+        elif argv[4] == "validate_game_sequentially":
+            validation_func = validate_game.validate_game_sequentially
+
+    create_process(solutions, n_process, n_threads, validation_func)

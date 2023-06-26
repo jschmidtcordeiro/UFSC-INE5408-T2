@@ -1,4 +1,4 @@
-for i in range(100000):
+for i in range(int(4e5)):
     for j in range(9):
         line = ""
         for k in range(9):
